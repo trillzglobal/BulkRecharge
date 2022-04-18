@@ -40,13 +40,14 @@ class Controller extends BaseController
             $transaction_id = $this->uniqueID();
             $validator = Validator::make(["transaction_id"=> $transaction_id],
                         ["transaction_id"=>"unique:pre_load_stores"]);
-        }while(!$validator->failed());
+//            dd($validator);
+        }while($validator->failed());
 
         return $transaction_id;
     }
 
     protected function uniqueID(){
-        $string = uniqid("BULK-00",true);
+        $string = uniqid("BULK-00");
         return \Str::upper($string);
     }
 

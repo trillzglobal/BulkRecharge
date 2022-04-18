@@ -90,8 +90,9 @@ class VendController extends Controller
                     $accepted_amount += $amount;
                     $accepted_count++;
                     $transaction_id = $this->getTransactionId();
+//                    $transaction_id = 1550;
                     $success[] = ["transaction_id"=>$transaction_id,"upload_requests_id"=>$upload_id,"msisdn"=>$account, "type"=>2, "mno_id"=>$mno_id,'amount'=>$amount, 'data_package_id'=>$package_exist->id ];
-                    dd($success);
+//                    dd($success);
                 }
             }
 

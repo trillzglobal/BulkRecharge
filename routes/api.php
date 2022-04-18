@@ -20,11 +20,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix'=>'bulkrecharge/v1'],function($router){
 
-    Route::group(['middleware'=>'auth:api'], function($router){
+    Route::group(['middleware'=>['auth:api', 'ipCheck']], function($router){
         Route::get('sample/upload',);
         Route::post('upload/data',"\App\Http\Controllers\Service\VendController@uploadData");
         Route::get('query/{reference}',"\App\Http\Controllers\Service\TransactionController@queryTransaction");
     });
+    Route::post('create/ipaddress',"\App\Http\Controllers\User\IpDataController@storeIpData");
     Route::post('register',"\App\Http\Controllers\User\RegistrationController@register");
     Route::post('access/token', "\App\Http\Controllers\User\UserController@login");
     Route::get('cron/request', '\App\Http\Controllers\Service\TransactController@CronTransact');

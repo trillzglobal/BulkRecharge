@@ -16,6 +16,7 @@ class VendController extends Controller
 {
     //
 
+
     public function uploadData(Request $request){
 
         $this->validate(request(['reference', 'csv_file']), config('rules.upload'));

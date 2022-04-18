@@ -54,12 +54,13 @@ class Controller extends BaseController
 
     protected function call($url, array $data = [], array $headers = []) {
         $content = array("details"=>$data);
-        $hash_text = json_encode($content) . $this->app_key;
+//        $hash_text = json_encode($content) . $this->app_key;
+        $hash_text = json_encode($content) . config("api.airvend_api_key");
         $hash = hash('sha512', $hash_text);
 
         $headers = [
-            'username' => $this->username,
-            'password' => $this->password,
+            'username' => config("api.airvend_username"),
+            'password' => config("api.airvend_password"),
             'hash' => $hash
         ];
 
@@ -68,6 +69,7 @@ class Controller extends BaseController
 
     protected function api_call($url, array $data = [], array $headers = []) {
         \Log::debug('URL: '.$url);
+        \Log::debug('data: '.json_encode($data));
 
         try {
             $res = Http::withHeaders($headers)->post($url, $data);

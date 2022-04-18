@@ -10,11 +10,11 @@ class PreLoadStore extends Model
     use HasFactory;
 
     public function m_n_o_s(){
-        return $this->belongTo(MNO::class, "mno_id");
+        return $this->belongsTo(MNO::class, "m_n_o_id");
     }
 
     public function data_packages(){
-        return $this->belongTo(DataPackage::class, "data_package_id");
+        return $this->belongsTo(DataPackage::class, "data_package_id");
     }
 
 }

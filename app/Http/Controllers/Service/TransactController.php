@@ -17,8 +17,13 @@ class TransactController extends Controller
 
         //Select reference that is not treated
         $upload = UploadRequest::where("status","pending")->lockForUpdate()->first();
+        if(empty($upload))
+        {
+            return success("No Transaction to be treated.", []);
+        }
         $upload->status = "started";
         $upload->save();
+//        dd($upload);
         //Check if there is any transaction to treat, if not change status and exit
         if($upload->accepted_count < 1){
             $upload->status = "treated";
@@ -26,23 +31,24 @@ class TransactController extends Controller
         }
         $user = User::where('id', $upload->id);
         $transactions  = $upload->pre_load_stores;
-
+//        dd($upload,$transactions);
         $url = config('api.base_url');
          //Check Estimated time to be within script running time
 
         foreach($transactions as $transaction){
             $mno_details = $transaction->m_n_o_s;
             $data_package = $transaction->data_packages;
-
+//            dd($mno_details,$data_package);
             $api_data = [
-                        "ref"=>$transaction->trasaction_id,
+                        "ref"=>$transaction->transaction_id,
                         "amount"=>$data_package->code,
-                        "network_id"=>$mno_details->type,
+                        "networkid"=>$mno_details->type,
                         "type"=>$transaction->type,
                         "account"=>$transaction->msisdn
             ];
 
-            $response = $this->call($url . 'vend/', $api_data);
+            $response = $this->call(config("api.airvend_base_url") . 'vend/', $api_data);
+            dd($response);
             if(is_numeric($response) || $response["confirmationCode"] != 200){
                 //Failed
             }

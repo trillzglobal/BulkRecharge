@@ -37,10 +37,7 @@ class VendController extends Controller
          *
          *
         */
-        if (!empty($theArray))
-        {
 
-        }
 
         if(!$array || count($array) < 2){
             return failed('Transaction cannot be treated', []);

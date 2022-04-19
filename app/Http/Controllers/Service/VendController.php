@@ -44,9 +44,11 @@ class VendController extends Controller
         }
 
         //Create record on Upload Table
-        $data = ['reference'=>$reference,
-                    'user_id'=>$user_id
-                    ];
+        $data = [
+            'serial'=>$array[0],
+            'reference'=>$reference,
+            'user_id'=>$user_id
+            ];
         $upload_id = UploadRequest::insertGetId($data);
 
         $total_amount = 0;
@@ -60,9 +62,10 @@ class VendController extends Controller
 
         foreach($array as $arr){
 
-            $phone_number = $arr[0];
-            $amount = $arr[1];
-            $period = $arr[2];
+            $serial = $arr[0];
+            $phone_number = $arr[1];
+            $amount = $arr[2];
+            $period = $arr[3];
 
             $network =  $this->getNumberDetails($phone_number);
             $account = $network['account'];

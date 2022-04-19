@@ -13,6 +13,7 @@ class SampleDataExport implements FromCollection, WithHeadings
     */
     public function headings():array{
         return[
+            'serial',
             'phone_number',
             'amount',
             'validity'
@@ -21,6 +22,6 @@ class SampleDataExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        return SampleData::select(['phone_number','amount','validity'])->get();
+        return SampleData::select(['serial','phone_number','amount','validity'])->get();
     }
 }

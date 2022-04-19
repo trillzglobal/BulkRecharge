@@ -15,6 +15,7 @@ class CreateSampleDataTable extends Migration
     {
         Schema::create('sample_data', function (Blueprint $table) {
             $table->id();
+            $table->string('serial');
             $table->string('phone_number');
             $table->float('amount');
             $table->enum('validity',['M','W','D']);

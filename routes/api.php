@@ -29,4 +29,7 @@ Route::group(['prefix'=>'bulkrecharge/v1'],function($router){
     Route::post('register',"\App\Http\Controllers\User\RegistrationController@register");
     Route::post('access/token', "\App\Http\Controllers\User\UserController@login");
     Route::get('cron/request', '\App\Http\Controllers\Service\TransactController@CronTransact');
+
+    Route::post('download/data_package', '\App\Http\Controllers\Service\VendController@get_data_package');
+    Route::post('download/sample_data', '\App\Http\Controllers\Service\VendController@get_sample_data');
 });

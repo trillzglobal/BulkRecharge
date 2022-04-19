@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Service;
 
+use App\Exports\DataPackageExport;
+use App\Exports\SampleDataExport;
 use App\Http\Controllers\Controller;
 use App\Models\AirtimeShortcode;
 use App\Models\DataPackage;
@@ -15,7 +17,6 @@ use stdClass;
 class VendController extends Controller
 {
     //
-
 
     public function uploadData(Request $request){
 
@@ -31,6 +32,15 @@ class VendController extends Controller
         $theArray = \Excel::toArray(new stdClass(), $request->file('csv_file'));
         $array = $theArray[0];
         array_shift($array);
+
+        /*check if the file  is coming as an array of data or as Excel CSV
+         *
+         *
+        */
+        if (!empty($theArray))
+        {
+
+        }
 
         if(!$array || count($array) < 2){
             return failed('Transaction cannot be treated', []);
@@ -161,6 +171,16 @@ class VendController extends Controller
 
         $save = $model::insert($data);
         return $save;
+    }
+
+    public function get_data_package()
+    {
+        return Excel::download(new DataPackageExport, 'Data_packages_sample_data.csv');
+    }
+
+    public function get_sample_data()
+    {
+        return Excel::download(new SampleDataExport, 'sample_data.csv');
     }
 
 

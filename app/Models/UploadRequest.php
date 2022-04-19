@@ -12,4 +12,8 @@ class UploadRequest extends Model
     public function pre_load_stores(){
         return $this->hasMany(PreLoadStore::class);
     }
+
+    public function users(){
+        return $this->belongsTo(User::class, "user_id");
+    }
 }

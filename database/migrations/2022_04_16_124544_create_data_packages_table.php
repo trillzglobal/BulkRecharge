@@ -20,7 +20,7 @@ class CreateDataPackagesTable extends Migration
             $table->enum('validity',['M','W','D']);
             $table->string('description')->nullable();
             $table->float('amount');
-            $table->float('code');
+            $table->string('code');
             $table->softDeletes();
             $table->timestamp('created_at')->default(\DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(\DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

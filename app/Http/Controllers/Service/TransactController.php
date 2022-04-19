@@ -31,10 +31,14 @@ class TransactController extends Controller
         }
         $user = User::where('id', $upload->id);
         $transactions  = $upload->pre_load_stores;
-//        dd($upload,$transactions);
-        $url = config('api.base_url');
-         //Check Estimated time to be within script running time
 
+         //Check Estimated time to be within script running time
+        $failed_count = 0;
+        $success_count = 0;
+        $total_amount_failed = 0;
+        $total_amount_success = 0;
+
+        $start_time = microtime(true);
         foreach($transactions as $transaction){
             $mno_details = $transaction->m_n_o_s;
             $data_package = $transaction->data_packages;
@@ -48,12 +52,29 @@ class TransactController extends Controller
             ];
 
             $response = $this->call(config("api.airvend_base_url") . 'vend/', $api_data);
-            dd($response);
-            if(is_numeric($response) || $response["confirmationCode"] != 200){
-                //Failed
-            }
-        }
 
+            if(is_numeric($response) || $response["confirmationCode"] != 200){
+                $transaction->status= "failed";
+                $failed_count++;
+                $total_amount_failed += $data_package->amount;
+            }else{
+                $transaction->status = "success";
+                $success_count++;
+                $total_amount_success += $data_package->amount;
+            }
+
+            $transaction->save();
+
+        }
+        $stop_time = microtime(true);
+
+        $upload->status = "treated";
+        $upload->failed_count = $failed_count;
+        $upload->total_amount_failed = $total_amount_failed;
+        $upload->success_count = $success_count;
+        $upload->total_amount_success = $total_amount_success;
+        $upload->actual_time = $stop_time - $start_time;
+        $upload->save();
 
         $return = UploadRequest::where('id',$upload->id)
                                 ->with('pre_load_stores.data_packages',
@@ -61,14 +82,16 @@ class TransactController extends Controller
                                     'users')
                                 ->get();
 
-        //Perform transaction
+        // dd($user);
 
+        $sent_status =  $this->api_call($upload->users->webhook,$return->toArray());
+        //{"status":"success", "responseCode":200}
 
+        if(!is_numeric($sent_status)){
+            
+        }
 
-
-
-        //Store success and failed
-        //Send Response through webhook
+        return success("Transaction completed.", $return);
     }
 
     public function queryTransaction($reference){

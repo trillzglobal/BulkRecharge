@@ -45,7 +45,6 @@ class VendController extends Controller
 
         //Create record on Upload Table
         $data = [
-            'serial'=>$array[0],
             'reference'=>$reference,
             'user_id'=>$user_id
             ];
@@ -102,7 +101,7 @@ class VendController extends Controller
                     $accepted_count++;
                     $transaction_id = $this->getTransactionId();
 //                    $transaction_id = 1550;
-                    $success[] = ["transaction_id"=>$transaction_id,"upload_request_id"=>$upload_id,"msisdn"=>$account, "type"=>2, "m_n_o_id"=>$mno_id,'amount'=>$amount, 'data_package_id'=>$package_exist->id ];
+                    $success[] = ["serial"=>$serial,"transaction_id"=>$transaction_id,"upload_request_id"=>$upload_id,"msisdn"=>$account, "type"=>2, "m_n_o_id"=>$mno_id,'amount'=>$amount, 'data_package_id'=>$package_exist->id ];
 //                    dd($success);
                 }
             }

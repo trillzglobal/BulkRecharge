@@ -7,6 +7,7 @@ use App\Exports\SampleDataExport;
 use App\Http\Controllers\Controller;
 use App\Models\AirtimeShortcode;
 use App\Models\DataPackage;
+use App\Models\PreLoadAirtimeStore;
 use App\Models\PreLoadStore;
 use App\Models\UploadRequest;
 use Illuminate\Http\Request;
@@ -133,8 +134,6 @@ class VendController extends Controller
         return success("transaction accepted", $data);
     }
 
-
-
     private function getNumberDetails($account, $country_code = 234)
     {
         //Remove plus
@@ -165,7 +164,6 @@ class VendController extends Controller
         return $details;
     }
 
-
     protected function saveData($data, $model)
     {
 
@@ -183,21 +181,17 @@ class VendController extends Controller
         return Excel::download(new SampleDataExport, 'sample_data.csv');
     }
 
-
-
     public function uploadAirtime(Request $request)
     {
-
+        // dd($request->details);
         $data = $this->getArray($request, ["serial", "phone_number", "amount"]);
-        /*check if the file  is coming as an array of data or as Excel CSV
-         *
-         *
-        */
-        $array = $data["array"];
 
         if (empty($data) || $data == false) {
             return failed('No data to treat', []);
         }
+
+        $array = $data["array"];
+
 
         $user_id =  $this->authUser()->id;
 
@@ -226,11 +220,12 @@ class VendController extends Controller
         $success = [];
         $errors = [];
 
+        // dd($array);
         foreach ($array as $arr) {
 
-            $serial = $arr[0];
-            $phone_number = $arr[1];
-            $amount = $arr[2];
+            $serial = $arr["serial"];
+            $phone_number = $arr["phone_number"];
+            $amount = $arr["amount"];
 
             $network =  $this->getNumberDetails($phone_number);
             $account = $network['account'];
@@ -278,7 +273,7 @@ class VendController extends Controller
 
             return failed("No accepted transaction", $data);
         }
-        $this->saveData($success, PreLoadStore::class);
+        $this->saveData($success, PreLoadAirtimeStore::class);
 
         return success("transaction accepted", $data);
     }
@@ -286,6 +281,7 @@ class VendController extends Controller
 
     private function getArray($request, array $arr)
     {
+        // dd($request->details,$request->reference );
         if ($request->has(['csv_file', 'details'])) {
             return failed('Request cannot contain both type of body', []);
         }
@@ -311,6 +307,7 @@ class VendController extends Controller
 
         if ($request->has('details')) {
 
+            // dd($request);
             $this->validate(request(['reference', 'details']), config('rules.upload_details'));
             $reference = $request->reference;
             $request = $request->all();

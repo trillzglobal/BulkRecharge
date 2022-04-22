@@ -16,5 +16,9 @@ return [
     'upload'=>[
         'reference'=>'required|unique:upload_requests',
         'csv_file' => 'required|mimes:csv,txt'
+    ],
+    'upload_details'=>[
+        'reference'=>'required|unique:upload_requests',
+        'details' => 'required'
     ]
 ];

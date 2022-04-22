@@ -13,6 +13,10 @@ class UploadRequest extends Model
         return $this->hasMany(PreLoadStore::class);
     }
 
+    public function pre_load_airtime_stores(){
+        return $this->hasMany(PreLoadAirtimeStore::class);
+    }
+
     public function users(){
         return $this->belongsTo(User::class, "user_id");
     }

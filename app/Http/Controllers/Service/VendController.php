@@ -18,17 +18,18 @@ class VendController extends Controller
 {
     //
 
-    public function uploadData(Request $request){
+    public function uploadData(Request $request)
+    {
 
         $this->validate(request(['reference', 'csv_file']), config('rules.upload'));
         $reference = $request->reference;
 
         $user_id =  $this->authUser()->id;
 
-        if(!$user_id){
+        if (!$user_id) {
             return failed('User is not allowed to perform transaction', []);
         }
-         // Get the csv rows as an array
+        // Get the csv rows as an array
         $theArray = \Excel::toArray(new stdClass(), $request->file('csv_file'));
         $array = $theArray[0];
         array_shift($array);
@@ -39,16 +40,16 @@ class VendController extends Controller
         */
 
 
-        if(!$array || count($array) < 2){
+        if (!$array || count($array) < 2) {
             return failed('Transaction cannot be treated', []);
         }
 
         //Create record on Upload Table
         $data = [
-            'serial'=>$array[0],
-            'reference'=>$reference,
-            'user_id'=>$user_id
-            ];
+            'serial' => $array[0],
+            'reference' => $reference,
+            'user_id' => $user_id
+        ];
         $upload_id = UploadRequest::insertGetId($data);
 
         $total_amount = 0;
@@ -60,7 +61,7 @@ class VendController extends Controller
         $success = [];
         $errors = [];
 
-        foreach($array as $arr){
+        foreach ($array as $arr) {
 
             $serial = $arr[0];
             $phone_number = $arr[1];
@@ -71,64 +72,65 @@ class VendController extends Controller
             $account = $network['account'];
             $mno_id = $network['mno_id'];
             if (!$network or !$account or strlen($account) < 10 or strlen($account) > 11 or !\is_numeric($amount) or $amount <= 0) {
-                $errors[] = ['phone_number'=>$account,
-                "amount"=>$amount,
-                "validity"=>$period,
-                "reject_reason"=>"Error in formatting"];
+                $errors[] = [
+                    'phone_number' => $account,
+                    "amount" => $amount,
+                    "validity" => $period,
+                    "reject_reason" => "Error in formatting"
+                ];
                 $rejected_count++;
-                if(\is_numeric($amount) or $amount >= 0){
+                if (\is_numeric($amount) or $amount >= 0) {
                     $rejected_amount += $amount;
                 }
-
-            }else{
+            } else {
 
                 //Confirm if Data type Exist for MNO
                 $package_exist = DataPackage::where('amount', $amount)
-                                            ->where('validity', $period)
-                                            ->first();
+                    ->where('validity', $period)
+                    ->first();
 
-                if(!$package_exist){
-                    $errors[] = ['phone_number'=>$account,
-                                "amount"=>$amount,
-                                "validity"=>$period,
-                                "reject_reason"=>"Selected Package does not exist"];
+                if (!$package_exist) {
+                    $errors[] = [
+                        'phone_number' => $account,
+                        "amount" => $amount,
+                        "validity" => $period,
+                        "reject_reason" => "Selected Package does not exist"
+                    ];
                     $rejected_count++;
-                    if(\is_numeric($amount) or $amount >= 0){
+                    if (\is_numeric($amount) or $amount >= 0) {
                         $rejected_amount += $amount;
                     }
-                }else{
+                } else {
 
                     $accepted_amount += $amount;
                     $accepted_count++;
                     $transaction_id = $this->getTransactionId();
-//                    $transaction_id = 1550;
-                    $success[] = ["transaction_id"=>$transaction_id,"upload_request_id"=>$upload_id,"msisdn"=>$account, "type"=>2, "m_n_o_id"=>$mno_id,'amount'=>$amount, 'data_package_id'=>$package_exist->id ];
-//                    dd($success);
+                    //                    $transaction_id = 1550;
+                    $success[] = ["transaction_id" => $transaction_id, "upload_request_id" => $upload_id, "msisdn" => $account, "type" => 2, "m_n_o_id" => $mno_id, 'amount' => $amount, 'data_package_id' => $package_exist->id];
+                    //                    dd($success);
                 }
             }
-
-
-
         }
 
         $total_amount = $accepted_amount + $rejected_amount;
         $total_count = $accepted_count + $rejected_count;
         $eta = $accepted_count * 5;
-        $data = ["total_amount"=>$total_amount,
-                "total_count"=>$total_count,
-                "rejected_count"=>$rejected_count,
-                "rejected_amount"=>$rejected_amount,
-                "accepted_amount"=>$accepted_amount,
-                "accepted_count"=>$accepted_count,
-                "estimated_time"=>$eta
-             ];
+        $data = [
+            "total_amount" => $total_amount,
+            "total_count" => $total_count,
+            "rejected_count" => $rejected_count,
+            "rejected_amount" => $rejected_amount,
+            "accepted_amount" => $accepted_amount,
+            "accepted_count" => $accepted_count,
+            "estimated_time" => $eta
+        ];
         UploadRequest::where('id', $upload_id)->update($data);
 
-        $data = ["rejected"=>$errors, "accepted"=>$success, "summary"=>$data];
+        $data = ["rejected" => $errors, "accepted" => $success, "summary" => $data];
 
-        if(empty($success)){
+        if (empty($success)) {
 
-            return failed("No accepted transaction",$data);
+            return failed("No accepted transaction", $data);
         }
         $this->saveData($success, PreLoadStore::class);
 
@@ -137,7 +139,8 @@ class VendController extends Controller
 
 
 
-    private function getNumberDetails($account, $country_code = 234) {
+    private function getNumberDetails($account, $country_code = 234)
+    {
         //Remove plus
         if (Str::startsWith($account, ['+'])) {
             $account = Str::substr($account, 1, strlen($account));
@@ -159,15 +162,16 @@ class VendController extends Controller
 
         $code = substr($account, 0, 4);
         $network = AirtimeShortcode::where('short_code', $code)->first();
-        if(!$network){
+        if (!$network) {
             return false;
         }
-        $details = ['account'=>$account,'mno_id'=>$network->m_n_o_s->id];
+        $details = ['account' => $account, 'mno_id' => $network->m_n_o_s->id];
         return $details;
     }
 
 
-    protected function saveData($data, $model){
+    protected function saveData($data, $model)
+    {
 
         $save = $model::insert($data);
         return $save;
@@ -182,7 +186,4 @@ class VendController extends Controller
     {
         return Excel::download(new SampleDataExport, 'sample_data.csv');
     }
-
-
-
 }

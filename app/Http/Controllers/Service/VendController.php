@@ -46,16 +46,10 @@ class VendController extends Controller
 
         //Create record on Upload Table
         $data = [
-<<<<<<< HEAD
             'serial' => $array[0],
             'reference' => $reference,
             'user_id' => $user_id
         ];
-=======
-            'reference'=>$reference,
-            'user_id'=>$user_id
-            ];
->>>>>>> 62269fcc3dd5aaa641d2b80ebd8d42cac120ff30
         $upload_id = UploadRequest::insertGetId($data);
 
         $total_amount = 0;
@@ -111,15 +105,9 @@ class VendController extends Controller
                     $accepted_amount += $amount;
                     $accepted_count++;
                     $transaction_id = $this->getTransactionId();
-<<<<<<< HEAD
                     //                    $transaction_id = 1550;
                     $success[] = ["transaction_id" => $transaction_id, "upload_request_id" => $upload_id, "msisdn" => $account, "type" => 2, "m_n_o_id" => $mno_id, 'amount' => $amount, 'data_package_id' => $package_exist->id];
                     //                    dd($success);
-=======
-//                    $transaction_id = 1550;
-                    $success[] = ["serial"=>$serial,"transaction_id"=>$transaction_id,"upload_request_id"=>$upload_id,"msisdn"=>$account, "type"=>2, "m_n_o_id"=>$mno_id,'amount'=>$amount, 'data_package_id'=>$package_exist->id ];
-//                    dd($success);
->>>>>>> 62269fcc3dd5aaa641d2b80ebd8d42cac120ff30
                 }
             }
         }

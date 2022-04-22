@@ -30,6 +30,7 @@ Route::group(['prefix'=>'bulkrecharge/v1'],function($router){
     Route::post('register',"\App\Http\Controllers\User\RegistrationController@register");
     Route::post('access/token', "\App\Http\Controllers\User\UserController@login");
     Route::get('cron/request', '\App\Http\Controllers\Service\TransactController@CronTransact');
+    
     Route::group(['middleware'=>['auth:api']], function($router){
         Route::get("statistics", "\App\Http\Controllers\Service\TransactionController@getStatistics");
         Route::get("transactions", "\App\Http\Controllers\Service\TransactionController@getTransactions");

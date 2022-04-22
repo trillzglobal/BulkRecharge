@@ -35,11 +35,11 @@ class Controller extends BaseController
         return $user;
     }
 
-    protected function getTransactionId(){
+    protected function getTransactionId($table){
         do{
             $transaction_id = $this->uniqueID();
             $validator = Validator::make(["transaction_id"=> $transaction_id],
-                        ["transaction_id"=>"unique:pre_load_stores"]);
+                        ["transaction_id"=>"unique:$table"]);
 //            dd($validator);
         }while($validator->failed());
 

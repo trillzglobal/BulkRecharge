@@ -20,33 +20,30 @@ class VendController extends Controller
 
     public function uploadData(Request $request){
 
-        $this->validate(request(['reference', 'csv_file']), config('rules.upload'));
-        $reference = $request->reference;
+       $data =  $this->getArray($request, ["serial", "phone_number", "amount", "period"]);
 
+       if(empty($data) || $data == false){
+           return failed('No data to treat', []);
+       }
+
+       $array = $data["array"];
+        
+        
         $user_id =  $this->authUser()->id;
 
         if(!$user_id){
             return failed('User is not allowed to perform transaction', []);
         }
-         // Get the csv rows as an array
-        $theArray = \Excel::toArray(new stdClass(), $request->file('csv_file'));
-        $array = $theArray[0];
-        array_shift($array);
 
-        /*check if the file  is coming as an array of data or as Excel CSV
-         *
-         *
-        */
-
-
-        if(!$array || count($array) < 2){
+        if(!$array || count($array) < 1){
             return failed('Transaction cannot be treated', []);
         }
 
         //Create record on Upload Table
         $data = [
-            'reference'=>$reference,
-            'user_id'=>$user_id
+            'reference'=>$data["reference"],
+            'user_id'=>$user_id,
+            'type'=>2
             ];
         $upload_id = UploadRequest::insertGetId($data);
 
@@ -99,7 +96,7 @@ class VendController extends Controller
 
                     $accepted_amount += $amount;
                     $accepted_count++;
-                    $transaction_id = $this->getTransactionId();
+                    $transaction_id = $this->getTransactionId('pre_load_stores');
 //                    $transaction_id = 1550;
                     $success[] = ["serial"=>$serial,"transaction_id"=>$transaction_id,"upload_request_id"=>$upload_id,"msisdn"=>$account, "type"=>2, "m_n_o_id"=>$mno_id,'amount'=>$amount, 'data_package_id'=>$package_exist->id ];
 //                    dd($success);
@@ -183,5 +180,140 @@ class VendController extends Controller
     }
 
 
+
+    public function uploadAirtime(Request $request){
+
+        $data = $this->getArray($request, ["serial", "phone_number", "amount"]);
+        /*check if the file  is coming as an array of data or as Excel CSV
+         *
+         *
+        */
+        $array = $data["array"];
+
+        if(empty($data) || $data == false){
+            return failed('No data to treat', []);
+        }
+
+        $user_id =  $this->authUser()->id;
+    
+        if(!$user_id){
+            return failed('User is not allowed to perform transaction', []);
+        }
+
+        if(!$array || count($array) < 1){
+            return failed('Transaction cannot be treated', []);
+        }
+
+        //Create record on Upload Table
+        $data = [
+            'reference'=>$data["reference"],
+            'user_id'=>$user_id,
+            'type'=>1
+            ];
+        $upload_id = UploadRequest::insertGetId($data);
+
+        $total_amount = 0;
+        $total_count = 0;
+        $rejected_count = 0;
+        $accepted_count = 0;
+        $rejected_amount = 0;
+        $accepted_amount = 0;
+        $success = [];
+        $errors = [];
+
+        foreach($array as $arr){
+
+            $serial = $arr[0];
+            $phone_number = $arr[1];
+            $amount = $arr[2];
+
+            $network =  $this->getNumberDetails($phone_number);
+            $account = $network['account'];
+            $mno_id = $network['mno_id'];
+            if (!$network or !$account or strlen($account) < 10 or strlen($account) > 11 or !\is_numeric($amount) or $amount <= 0) {
+                $errors[] = ['phone_number'=>$account,
+                "amount"=>$amount,
+                "reject_reason"=>"Error in formatting"];
+                $rejected_count++;
+                if(\is_numeric($amount) or $amount >= 0){
+                    $rejected_amount += $amount;
+                }
+
+            }else{
+
+               
+                    $accepted_amount += $amount;
+                    $accepted_count++;
+                    $transaction_id = $this->getTransactionId('pre_load_airtime_stores');
+//                    $transaction_id = 1550;
+                    $success[] = ["serial"=>$serial,"transaction_id"=>$transaction_id,"upload_request_id"=>$upload_id,"msisdn"=>$account, "type"=>1, "m_n_o_id"=>$mno_id,'amount'=>$amount];
+//                 
+                }
+
+        }
+
+
+        $total_amount = $accepted_amount + $rejected_amount;
+        $total_count = $accepted_count + $rejected_count;
+        $eta = $accepted_count * 5;
+        $data = ["total_amount"=>$total_amount,
+                "total_count"=>$total_count,
+                "rejected_count"=>$rejected_count,
+                "rejected_amount"=>$rejected_amount,
+                "accepted_amount"=>$accepted_amount,
+                "accepted_count"=>$accepted_count,
+                "estimated_time"=>$eta
+             ];
+        UploadRequest::where('id', $upload_id)->update($data);
+
+        $data = ["rejected"=>$errors, "accepted"=>$success, "summary"=>$data];
+
+        if(empty($success)){
+
+            return failed("No accepted transaction",$data);
+        }
+        $this->saveData($success, PreLoadStore::class);
+
+        return success("transaction accepted", $data);
+    }
+
+
+    private function getArray($request, array $arr){
+        if($request->has(['csv_file', 'details'])){
+            return failed('Request cannot contain both type of body', []);
+        }
+        
+        if($request->has(['csv_file'])){
+            
+            $this->validate(request(['reference', 'csv_file']), config('rules.upload'));
+            $reference = $request->reference;
+    
+            
+             // Get the csv rows as an array
+            $theArray = \Excel::toArray(new stdClass(), $request->file('csv_file'));
+            $array = $theArray[0];
+
+            $header =  $array[0];
+            if($header != $arr){
+                return failed("Arrange input as stated in csv file", []);
+            }
+            array_shift($array);
+
+            return ["array"=>$array, "reference"=>$reference];
+        }
+
+        if($request->has('details')){
+            
+            $this->validate(request(['reference', 'details']), config('rules.upload_details'));
+            $reference = $request->reference;
+            $request = $request->all();
+
+            return ["array"=>$request["details"], "reference"=>$reference];
+        }
+
+
+        return false;
+
+    }
 
 }

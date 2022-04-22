@@ -17,7 +17,7 @@ class CreateUploadRequestsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('reference');
-
+            $table->integer('type');
             $table->float('total_amount',14)->nullable();
             $table->integer('total_count')->nullable();
             $table->integer('rejected_count')->nullable();

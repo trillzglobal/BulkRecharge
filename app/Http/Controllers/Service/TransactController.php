@@ -24,6 +24,8 @@ class TransactController extends Controller
         $upload->status = "started";
         $upload->save();
         //        dd($upload);
+
+
         //Check if there is any transaction to treat, if not change status and exit
         if ($upload->accepted_count < 1) {
             $upload->status = "treated";
@@ -94,17 +96,56 @@ class TransactController extends Controller
         return success("Transaction completed.", $return);
     }
 
-    public function queryTransaction($reference)
+    public function queryTransaction($type, $reference)
     {
 
-        $return = UploadRequest::where('reference', $reference)
-            ->with(
+        if ($type == 'data') {
+            $return = UploadRequest::where('reference', $reference)
+                ->with(
+                    'pre_load_stores.data_packages',
+                    'pre_load_stores.m_n_o_s',
+                    'users'
+                )
+                ->get();
+        }
+
+        if ($type == 'airtime') {
+            $return = UploadRequest::where('reference', $reference)
+                ->with(
+                    'pre_load_airtime_stores.m_n_o_s',
+                    'users'
+                )
+                ->get();
+        }
+
+        if (empty($return)) {
+            return failed("Transaction does not exist", []);
+        }
+
+        return success("Transaction fetched successfully", $return);
+    }
+
+    public function getTransactions($type)
+    {
+        if ($type == 'data') {
+            $return = UploadRequest::with(
                 'pre_load_stores.data_packages',
                 'pre_load_stores.m_n_o_s',
                 'users'
             )
-            ->get();
-        if (empty($result)) {
+                ->paginate(50);
+        }
+
+        if ($type == 'airtime')
+        // dd("hello");
+        {
+            $return = UploadRequest::with(
+                'pre_load_airtime_stores.m_n_o_s',
+                'users'
+            )->paginate(50);
+        }
+
+        if (empty($return)) {
             return failed("Transaction does not exist", []);
         }
 

@@ -22,15 +22,14 @@ class VendController extends Controller
     public function uploadData(Request $request)
     {
 
-        $data =  $this->getArray($request, ["serial", "phone_number", "amount", "period"]);
+        $data =  $this->getArray($request, ["serial", "phone_number", "amount", "validity"]);
 
         if (empty($data) || $data == false) {
             return failed('No data to treat', []);
         }
 
         $array = $data["array"];
-
-
+        
         $user_id =  $this->authUser()->id;
 
         if (!$user_id) {
@@ -47,6 +46,7 @@ class VendController extends Controller
             'user_id' => $user_id,
             'type' => 2
         ];
+        
         $upload_id = UploadRequest::insertGetId($data);
 
         $total_amount = 0;

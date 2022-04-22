@@ -15,6 +15,7 @@ class CreatePreLoadStoresTable extends Migration
     {
         Schema::create('pre_load_stores', function (Blueprint $table) {
             $table->id();
+            $table->string('serial');
             $table->string('transaction_id')->unique();
             $table->unsignedBigInteger('upload_request_id');
             $table->unsignedBigInteger('m_n_o_id');

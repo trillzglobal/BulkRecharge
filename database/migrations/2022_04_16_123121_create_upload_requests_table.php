@@ -15,7 +15,6 @@ class CreateUploadRequestsTable extends Migration
     {
         Schema::create('upload_requests', function (Blueprint $table) {
             $table->id();
-            $table->string('serial');
             $table->unsignedBigInteger('user_id');
             $table->string('reference');
 

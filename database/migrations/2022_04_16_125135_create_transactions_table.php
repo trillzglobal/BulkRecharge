@@ -16,8 +16,8 @@ class CreateTransactionsTable extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('pre_load_stores_id');
-            $table->json('request')->default(['default']);
-            $table->json('response')->default([]);
+            $table->json('request');
+            $table->json('response');
             $table->enum('status', ['failed', 'success', 'pending'])->default('pending');
             $table->timestamps();
         });

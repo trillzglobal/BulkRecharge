@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
 use App\Models\{
+    PreLoadAirtimeStore,
+    PreLoadStore,
     UploadRequest,
     User
 };
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class TransactController extends Controller
@@ -94,6 +97,26 @@ class TransactController extends Controller
         }
 
         return success("Transaction completed.", $return);
+    }
+
+    public function getStatistics()
+    {
+        $user_id =  $this->authUser()->id;
+        // $data = PreLoadStore::select('*')->whereMonth('created_at', Carbon::now()->month)->count();
+        $data = PreLoadStore::select('*')
+            // ->where([''])
+            ->where('created_at', '>=', now()->firstOfMonth())
+            ->where('created_at', '<', now()->lastOfMonth())
+            ->count();
+        // $airtime = PreLoadAirtimeStore::select('*')->whereMonth('created_at', Carbon::now()->month)->count();
+        $airtime = PreLoadAirtimeStore::select('*')
+            ->where('created_at', '>=', now()->firstOfMonth())
+            ->where('created_at', '<', now()->lastOfMonth())
+            ->count();
+        $totalSuccessfulData = PreLoadStore::select('*')->where('status', 'successful')->whereMonth('created_at', Carbon::now()->month)->sum('amount');
+        $totalSuccessfulAirtime = PreLoadAirtimeStore::select('*')->where('status', 'successful')->whereMonth('created_at', Carbon::now()->month)->sum('amount');
+
+        return success("Statistics fetched successfully", ["data" => $data, "airtime" => $airtime, "total_sum_data" => $totalSuccessfulData, "total_sum_airtime" => $totalSuccessfulAirtime]);
     }
 
     public function queryTransaction($type, $reference)

@@ -34,6 +34,7 @@ class UserController extends Controller
             return expired('Invalid login credentials', null);
         }
 
+
         return $this->respondWithToken($token);
     }
 
@@ -59,6 +60,11 @@ class UserController extends Controller
         return $this->respondWithToken(auth()->refresh());
     }
 
+    public function tokenStatus(Request $request)
+    {
+        return response()->json(["status"=>"success", "userid"=> $request->user()->id], 200);
+    }
+
     /**
      * Get the token array structure.
      *
@@ -68,10 +74,20 @@ class UserController extends Controller
      */
     protected function respondWithToken($token)
     {
+        
+
         return success('Logged in successfully', [
+            'user'=>auth('api')->user(),
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
+    }
+
+    public function profile()
+    {
+        return response()->json(["status"=>"success",
+            "user"=>$this->authUser()
+        ], 200);
     }
 }

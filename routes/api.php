@@ -31,7 +31,10 @@ Route::group(['prefix'=>'bulkrecharge/v1'],function($router){
     Route::get('cron/request', '\App\Http\Controllers\Service\TransactController@CronTransact');
     
     Route::group(['middleware'=>['auth:api']], function($router){
-        Route::get("statistics", "\App\Http\Controllers\Service\TransactionController@getStatistics");
+        Route::get('token/status', '\App\Http\Controllers\User\UserController@tokenStatus');
+        Route::get('user/profile', '\App\Http\Controllers\User\UserController@profile');
+
+        Route::get("statistics", "\App\Http\Controllers\Service\TransactController@getStatistics");
         Route::get("transaction/{type}", "\App\Http\Controllers\Service\TransactController@getTransactions");
         Route::get("transaction/{type}/{reference}", "\App\Http\Controllers\Service\TransactController@queryTransaction");
     });

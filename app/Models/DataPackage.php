@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class DataPackage extends Model
 {
     use HasFactory;
+    protected $dateFormat = 'Y-m-d H:i:s';
+
 }

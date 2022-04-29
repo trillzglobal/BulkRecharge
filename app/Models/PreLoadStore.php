@@ -16,5 +16,7 @@ class PreLoadStore extends Model
     public function data_packages(){
         return $this->belongsTo(DataPackage::class, "data_package_id");
     }
+    protected $dateFormat = 'Y-m-d H:i:s';
+
 
 }

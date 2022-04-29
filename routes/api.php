@@ -35,9 +35,10 @@ Route::group(['prefix'=>'bulkrecharge/v1'],function($router){
         Route::get('user/profile', '\App\Http\Controllers\User\UserController@profile');
 
         Route::get("statistics", "\App\Http\Controllers\Service\TransactController@getStatistics");
-        Route::get("transaction/{type}", "\App\Http\Controllers\Service\TransactController@getTransactions");
-        Route::get("transaction/{type}/{reference}", "\App\Http\Controllers\Service\TransactController@queryTransaction");
+        Route::get("transactions", "\App\Http\Controllers\Service\TransactController@getTransactions");
+        Route::get("transaction/{id}", "\App\Http\Controllers\Service\TransactController@queryTransaction");
     });
     Route::post('download/data_package', '\App\Http\Controllers\Service\VendController@get_data_package');
     Route::post('download/sample_data', '\App\Http\Controllers\Service\VendController@get_sample_data');
+    Route::post('logout', '\App\Http\Controllers\User\UserController@logout');
 });

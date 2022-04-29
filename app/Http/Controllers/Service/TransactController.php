@@ -119,27 +119,32 @@ class TransactController extends Controller
         return success("Statistics fetched successfully", ["data" => $data, "airtime" => $airtime, "total_sum_data" => $totalSuccessfulData, "total_sum_airtime" => $totalSuccessfulAirtime]);
     }
 
-    public function queryTransaction($type, $reference)
+    public function queryTransaction($reference)
     {
+        $type = UploadRequest::select('type', 'id')->where('reference', $reference)->first();
+        
+        if ($type->type == '2') {
 
-        if ($type == 'data') {
-            $return = UploadRequest::where('reference', $reference)
-                ->with(
-                    'pre_load_stores.data_packages',
-                    'pre_load_stores.m_n_o_s',
-                    'users'
-                )
-                ->get();
+            $return = PreLoadStore::where('upload_request_id', $type->id)->with('m_n_o_s', 'data_packages')->get();
+            // $return = UploadRequest::where('reference', $reference)
+            //     ->with(
+            //         'pre_load_stores.data_packages',
+            //         'pre_load_stores.m_n_o_s',
+            //         'users'
+            //     )
+            //     ->get();
         }
 
-        if ($type == 'airtime') {
-            $return = UploadRequest::where('reference', $reference)
-                ->with(
-                    'pre_load_airtime_stores.m_n_o_s',
-                    'users'
-                )
-                ->get();
+        if ($type->type == '1') {
+            $return = PreLoadAirtimeStore::where('upload_request_id', $type->id)->with('m_n_o_s')->get();
+            // $return = UploadRequest::where('reference', $reference)
+            //     ->with(
+            //         'pre_load_airtime_stores.m_n_o_s',
+            //         'users'
+            //     )
+            //     ->get();
         }
+
 
         if (empty($return)) {
             return failed("Transaction does not exist", []);
@@ -148,25 +153,9 @@ class TransactController extends Controller
         return success("Transaction fetched successfully", $return);
     }
 
-    public function getTransactions($type)
+    public function getTransactions()
     {
-        if ($type == 'data') {
-            $return = UploadRequest::with(
-                'pre_load_stores.data_packages',
-                'pre_load_stores.m_n_o_s',
-                'users'
-            )
-                ->paginate(50);
-        }
-
-        if ($type == 'airtime')
-        // dd("hello");
-        {
-            $return = UploadRequest::with(
-                'pre_load_airtime_stores.m_n_o_s',
-                'users'
-            )->paginate(50);
-        }
+        $return = UploadRequest::orderBy('created_at', 'DESC')->paginate(50);
 
         if (empty($return)) {
             return failed("Transaction does not exist", []);

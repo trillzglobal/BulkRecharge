@@ -20,4 +20,6 @@ class UploadRequest extends Model
     public function users(){
         return $this->belongsTo(User::class, "user_id");
     }
+    protected $dateFormat = 'Y-m-d H:i:s';
+
 }

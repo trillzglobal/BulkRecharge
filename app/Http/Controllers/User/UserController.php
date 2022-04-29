@@ -45,10 +45,11 @@ class UserController extends Controller
      */
     public function logout()
     {
-        auth()->logout();
-
-        return $this->success('Successfully logged out', null);
+        $logout = auth()->logout();
+        return success('Successfully logged out', $logout);
     }
+
+
 
     /**
      * Refresh a token.

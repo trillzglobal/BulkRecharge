@@ -14,5 +14,7 @@ class PreLoadAirtimeStore extends Model
     public function m_n_o_s(){
         return $this->belongsTo(MNO::class, "m_n_o_id");
     }
+    protected $dateFormat = 'Y-m-d H:i:s';
+
 
 }
